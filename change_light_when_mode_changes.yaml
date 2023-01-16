@@ -1,0 +1,114 @@
+blueprint:
+  name: Change light when mode changes
+  description: Changes lights on mode change. When mode is Away they are automatically shut off.
+  domain: automation
+
+  input:
+    light_target:
+      name: Light(s)
+      selector:
+        target:
+          entity:
+            domain: light
+    morning_brightness:
+      name: Morning Brightness
+      description: 0-100%.
+      default: 10
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 1
+          mode: slider
+    day_brightness:
+      name: Day Brightness
+      description: 0-100%.
+      default: 75
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 1
+          mode: slider
+    evening_brightness:
+      name: Evening Brightness
+      description: 0-100%.
+      default: 35
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 1
+          mode: slider
+    night_brightness:
+      name: Night Brightness
+      description: 0-100%.
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 1
+          mode: slider
+
+trigger:
+  - platform: state
+    entity_id:
+      - input_select.modes
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 5
+
+# If modes changes again within the delay,
+# we restart the script.
+mode: restart
+max_exceeded: silent
+
+condition: []
+action:
+  choose:
+    - conditions:
+        condition: state
+        entity_id: input_select.modes
+        state: Morning
+      sequence:
+        service: light.turn_on
+        data:
+          brightness_pct: !input morning_brightness
+        target: !input light_target
+    - conditions:
+        condition: state
+        entity_id: input_select.modes
+        state: Day
+      sequence:
+        service: light.turn_on
+        data:
+          brightness_pct: !input day_brightness
+        target: !input light_target
+    - conditions:
+        condition: state
+        entity_id: input_select.modes
+        state: Evening
+      sequence:
+        service: light.turn_on
+        data:
+          brightness_pct: !input evening_brightness
+        target: !input light_target
+    - conditions:
+        condition: state
+        entity_id: input_select.modes
+        state: Night
+      sequence:
+        service: light.turn_on
+        data:
+          brightness_pct: !input night_brightness
+        target: !input light_target
+    - conditions:
+        condition: state
+        entity_id: input_select.modes
+        state: Away
+      sequence:
+        service: light.turn_off
+        data: {}
+        target: !input light_target
