@@ -2,6 +2,7 @@ blueprint:
   name: Change light when mode changes
   description: Changes lights on mode change. When mode is Away they are automatically shut off.
   domain: automation
+  source_url: https://gist.github.com/ticstyle/f5f7409f5b9259f60bdeb5a3346666e9
 
   input:
     light_target:
