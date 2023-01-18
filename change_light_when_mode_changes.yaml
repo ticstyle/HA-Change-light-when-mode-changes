@@ -1,8 +1,8 @@
 blueprint:
   name: Change light when mode changes
   description:
-    Changes lights on mode change, with a random delay of 5 to 30 seconds to spread out the work load on the network . When mode is Away they are automatically
-    shut off.
+    Changes lights on mode change, with a random delay of 5 to 30 seconds to spread out the work load on the network . 
+    When mode is Away they are automatically shut off.
     This blueprint is built with a dependency off a lis-helper named (input_select.modes) and the list items are the following five
     (Away, Morning, Day, Evening, Night).
     This helper is used by an automation to set Away if no family members or guests are at home.
