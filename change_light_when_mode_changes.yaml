@@ -1,12 +1,13 @@
 blueprint:
   name: Change light when mode changes
   description:
-    Changes lights on mode change, with a random delay of 5 to 30 seconds to spread out the work load on the network . 
+    Changes lights on mode change, with a random delay of 5 to 30 seconds to spread out the work load on the network .
     When mode is Away they are automatically shut off.
     This blueprint is built with a dependency off a lis-helper named (input_select.modes) and the list items are the following five
     (Away, Morning, Day, Evening, Night).
     This helper is used by an automation to set Away if no family members or guests are at home.
     The other ones are set for different times of the day if anyone is home.
+    We also need a boolean helper sensor (input_boolean.sleep_in) that you can set to on if you want to sleep in, if that sensor is (On) the (Morning) modes is ignored.
   domain: automation
   source_url: https://gist.github.com/ticstyle/f5f7409f5b9259f60bdeb5a3346666e9
   input:
@@ -16,6 +17,13 @@ blueprint:
         target:
           entity:
             domain: light
+    #sleep_in_sensor:
+    #  name: Sleep in Sensor
+    #  description: For example a boolean helper
+    #  selector:
+    #    target:
+    #      entity:
+    #        domain: input_boolean
     morning_brightness:
       name: Morning Brightness
       description: 0-100%.
@@ -72,9 +80,14 @@ action:
       seconds: "{{ range(5, 30)|random|int }}"
   - choose:
       - conditions:
-          condition: state
-          entity_id: input_select.modes
-          state: Morning
+          - condition: and
+            conditions:
+              - condition: state
+                entity_id: input_select.modes
+                state: Morning
+              - condition: state
+                entity_id: input_boolean.sleep_in
+                state: "off"
         sequence:
           service: light.turn_on
           data:
