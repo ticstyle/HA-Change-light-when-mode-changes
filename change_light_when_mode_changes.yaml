@@ -1,13 +1,18 @@
 blueprint:
   name: Change light when mode changes
   description:
-    Changes lights on mode change, with a random delay of 5 to 30 seconds to spread out the work load on the network .
+    Changes lights on mode change, with a random delay of 5 to 30 seconds to spread out the work load on the network if for example one would use this template multiple times.
+
     When mode is Away they are automatically shut off.
-    This blueprint is built with a dependency off a lis-helper named (input_select.modes) and the list items are the following five
+
+    This blueprint is built with a dependency off a list-helper named (input_select.modes) and the list items are the following five
     (Away, Morning, Day, Evening, Night).
+
     This helper is used by an automation to set Away if no family members or guests are at home.
+    Blueprint for that can be found here https://gist.github.com/ticstyle/bdc6f07a00d4f3d97e4967018f58c9e6
     The other ones are set for different times of the day if anyone is home.
-    We also need a boolean helper sensor (input_boolean.sleep_in) that you can set to on if you want to sleep in, if that sensor is (On) the (Morning) modes is ignored.
+    
+    #We also need a boolean helper sensor (input_boolean.sleep_in) that you can set to on if you want to sleep in, if that sensor is (On) the (Morning) modes is ignored.
   domain: automation
   source_url: https://gist.github.com/ticstyle/f5f7409f5b9259f60bdeb5a3346666e9
   input:
@@ -85,10 +90,10 @@ blueprint:
           step: 1.0
           mode: slider
 variables:
-  morning_toggle: !input morning_toggle
-  day_toggle: !input day_toggle
-  evening_toggle: !input evening_toggle
-  night_toggle: !input night_toggle
+  morning_toggle_var: !input morning_toggle
+  day_toggle_var: !input day_toggle
+  evening_toggle_var: !input evening_toggle
+  night_toggle_var: !input night_toggle
 trigger:
   - platform: state
     entity_id:
@@ -113,9 +118,8 @@ action:
               - condition: state
                 entity_id: input_boolean.sleep_in
                 state: "off"
-              - condition: state
-                entity_id: !input morning_toggle
-                state: true
+              - condition: template
+                value_template: "{{ is_state(morning_toggle_var, 'on') }}"
         sequence:
           service: light.turn_on
           data:
@@ -127,9 +131,8 @@ action:
               - condition: state
                 entity_id: input_select.modes
                 state: Day
-              - condition: state
-                entity_id: !input day_toggle
-                state: true
+              - condition: template
+                value_template: "{{ is_state(day_toggle_var, 'on') }}"
         sequence:
           service: light.turn_on
           data:
@@ -141,9 +144,8 @@ action:
               - condition: state
                 entity_id: input_select.modes
                 state: Evening
-              - condition: state
-                entity_id: !input evening_toggle
-                state: true
+              - condition: template
+                value_template: "{{ is_state(evening_toggle_var, 'on') }}"
         sequence:
           service: light.turn_on
           data:
@@ -155,9 +157,8 @@ action:
               - condition: state
                 entity_id: input_select.modes
                 state: Night
-              - condition: state
-                entity_id: !input night_toggle
-                state: true
+              - condition: template
+                value_template: "{{ is_state(night_toggle_var, 'on') }}"
         sequence:
           service: light.turn_on
           data:
