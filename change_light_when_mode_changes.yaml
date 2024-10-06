@@ -1,18 +1,18 @@
 blueprint:
   name: Change light when mode changes
   description:
-    Changes lights on mode change, with a random delay of 5 to 30 seconds to spread out the work load on the network if for example one would use this template multiple times.
+    "Changes lights on mode change, with a random delay of 5 to 30 seconds
+    to spread out the work load on the network if for example one would use this template
+    multiple times.
 
     When mode is Away they are automatically shut off.
 
-    This blueprint is built with a dependency off a list-helper named (input_select.modes) and the list items are the following five
-    (Away, Morning, Day, Evening, Night).
+    This blueprint is built with a dependency off a list-helper named (input_select.modes)
+    and the list items are the following five (Away, Morning, Day, Evening, Night).
 
-    This helper is used by an automation to set Away if no family members or guests are at home.
-    Blueprint for that can be found here https://gist.github.com/ticstyle/bdc6f07a00d4f3d97e4967018f58c9e6
-    The other ones are set for different times of the day if anyone is home.
-
-    #We also need a boolean helper sensor (input_boolean.sleep_in) that you can set to on if you want to sleep in, if that sensor is (On) the (Morning) modes is ignored.
+    This helper is used by an automation to set Away if no family members or guests
+    are at home. Blueprint for that can be found here https://gist.github.com/ticstyle/bdc6f07a00d4f3d97e4967018f58c9e6
+    The other ones are set for different times of the day if anyone is home."
   domain: automation
   source_url: https://gist.github.com/ticstyle/f5f7409f5b9259f60bdeb5a3346666e9
   input:
@@ -21,14 +21,20 @@ blueprint:
       selector:
         target:
           entity:
-            domain: light
-    #sleep_in_sensor:
-    #  name: Sleep in Sensor
-    #  description: For example a boolean helper
-    #  selector:
-    #    target:
-    #      entity:
-    #        domain: input_boolean
+            - domain:
+                - light
+    mode:
+      name: Mode entity
+      description: For example a input select helper
+      default: input_select.modes
+      selector:
+        entity:
+    sleep_in_sensor:
+      name: Sleep in Sensor
+      description: For example a boolean helper
+      default: input_boolean.sleep_in
+      selector:
+        entity:
     morning_toggle:
       name: Use morning
       selector:
@@ -89,11 +95,11 @@ blueprint:
           max: 100.0
           step: 1.0
           mode: slider
-variables:
-  morning_toggle_var: !input morning_toggle
-  day_toggle_var: !input day_toggle
-  evening_toggle_var: !input evening_toggle
-  night_toggle_var: !input night_toggle
+    away_toggle:
+      name: Use away
+      selector:
+        boolean: {}
+      default: true
 trigger:
   - platform: state
     entity_id:
@@ -107,7 +113,7 @@ max_exceeded: silent
 condition: []
 action:
   - delay:
-      seconds: "{{ range(5, 30)|random|int }}"
+      seconds: "{{ range(1, 2)|random|int }}"
   - choose:
       - conditions:
           - condition: and
@@ -118,10 +124,9 @@ action:
               - condition: state
                 entity_id: input_boolean.sleep_in
                 state: "off"
-              - condition: template
-                value_template: "{{ is_state(morning_toggle_var, 'on') }}"
         sequence:
           service: light.turn_on
+          enabled: !input morning_toggle
           data:
             brightness_pct: !input morning_brightness
           target: !input light_target
@@ -131,10 +136,9 @@ action:
               - condition: state
                 entity_id: input_select.modes
                 state: Day
-              - condition: template
-                value_template: "{{ is_state(day_toggle_var, 'on') }}"
         sequence:
           service: light.turn_on
+          enabled: !input day_toggle
           data:
             brightness_pct: !input day_brightness
           target: !input light_target
@@ -144,10 +148,9 @@ action:
               - condition: state
                 entity_id: input_select.modes
                 state: Evening
-              - condition: template
-                value_template: "{{ is_state(evening_toggle_var, 'on') }}"
         sequence:
           service: light.turn_on
+          enabled: !input evening_toggle
           data:
             brightness_pct: !input evening_brightness
           target: !input light_target
@@ -157,10 +160,9 @@ action:
               - condition: state
                 entity_id: input_select.modes
                 state: Night
-              - condition: template
-                value_template: "{{ is_state(night_toggle_var, 'on') }}"
         sequence:
           service: light.turn_on
+          enabled: !input night_toggle
           data:
             brightness_pct: !input night_brightness
           target: !input light_target
@@ -172,3 +174,4 @@ action:
           service: light.turn_off
           data: {}
           target: !input light_target
+          enabled: !input away_toggle
