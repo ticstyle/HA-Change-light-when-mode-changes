@@ -16,6 +16,7 @@ blueprint:
   input:
     light_target:
       name: Light(s)
+      default: {}
       selector:
         target:
           entity:
