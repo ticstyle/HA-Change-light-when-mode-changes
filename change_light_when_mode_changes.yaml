@@ -50,6 +50,7 @@ blueprint:
 
     switch_target:
       name: Switch(es)
+      default: {}
       selector:
         target:
           entity:
