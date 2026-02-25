@@ -12,6 +12,7 @@ blueprint:
     The other ones are set for different times of the day if anyone is home."
   domain: automation
   source_url: https://gist.github.com/ticstyle/f5f7409f5b9259f60bdeb5a3346666e9
+
   input:
     light_target:
       name: Light(s)
@@ -20,13 +21,15 @@ blueprint:
           entity:
             - domain:
                 - light
+
     mode:
       name: Mode entity
       description: For example a input select helper
-      default: input_select.modes
+      default: input_select.modes_dev
       selector:
         entity:
           domain: input_select
+
     sleep_in_sensor:
       name: Sleep in Sensor
       description: For example a boolean helper
@@ -44,6 +47,7 @@ blueprint:
       default: false
       selector:
         boolean: {}
+
     switch_target:
       name: Switch(es)
       selector:
@@ -51,26 +55,31 @@ blueprint:
           entity:
             - domain:
                 - switch
+
     morning_switch_on:
       name: Morning – switches ON?
       default: true
       selector:
         boolean: {}
+
     day_switch_on:
       name: Day – switches ON?
       default: true
       selector:
         boolean: {}
+
     evening_switch_on:
       name: Evening – switches ON?
       default: true
       selector:
         boolean: {}
+
     night_switch_on:
       name: Night – switches ON?
       default: false
       selector:
         boolean: {}
+
     away_switch_on:
       name: Away – switches ON?
       default: false
@@ -81,10 +90,11 @@ blueprint:
     # Lights (original)
     # -----------------------
     morning_toggle:
-      name: Use morning
+      name: Use morning (effects both lights and switches)
       selector:
         boolean: {}
       default: true
+
     morning_brightness:
       name: Morning Brightness
       description: 0-100%.
@@ -95,11 +105,13 @@ blueprint:
           max: 100.0
           step: 1.0
           mode: slider
+
     day_toggle:
-      name: Use day
+      name: Use day (effects both lights and switches)
       selector:
         boolean: {}
       default: true
+
     day_brightness:
       name: Day Brightness
       description: 0-100%.
@@ -110,11 +122,13 @@ blueprint:
           max: 100.0
           step: 1.0
           mode: slider
+
     evening_toggle:
-      name: Use evening
+      name: Use evening (effects both lights and switches)
       selector:
         boolean: {}
       default: true
+
     evening_brightness:
       name: Evening Brightness
       description: 0-100%.
@@ -125,11 +139,13 @@ blueprint:
           max: 100.0
           step: 1.0
           mode: slider
+
     night_toggle:
-      name: Use night
+      name: Use night (effects both lights and switches)
       selector:
         boolean: {}
       default: true
+
     night_brightness:
       name: Night Brightness
       description: 0-100%.
@@ -140,8 +156,9 @@ blueprint:
           max: 100.0
           step: 1.0
           mode: slider
+
     away_toggle:
-      name: Use away
+      name: Use away (effects both lights and switches)
       selector:
         boolean: {}
       default: true
@@ -160,9 +177,9 @@ max_exceeded: silent
 condition: []
 
 action:
-  # Match the 5–30s delay described in the blueprint comments
+  # The delay
   - delay:
-      seconds: "{{ range(5, 31)|random|int }}"
+      seconds: "{{ range(5, 31) | random | int }}"
 
   - variables:
       do_switches: !input control_switches
@@ -171,6 +188,12 @@ action:
       sw_evening: !input evening_switch_on
       sw_night: !input night_switch_on
       sw_away: !input away_switch_on
+      # Make the Use morning/day/evening/night/away toggles control whole sequences
+      morning_enabled: !input morning_toggle
+      day_enabled: !input day_toggle
+      evening_enabled: !input evening_toggle
+      night_enabled: !input night_toggle
+      away_enabled: !input away_toggle
 
   - choose:
 
@@ -185,6 +208,8 @@ action:
                 entity_id: !input sleep_in_sensor
                 state: "off"
         sequence:
+          - condition: template
+            value_template: "{{ morning_enabled }}"
           - service: light.turn_on
             enabled: !input morning_toggle
             data:
@@ -214,6 +239,8 @@ action:
                 entity_id: !input mode
                 state: Day
         sequence:
+          - condition: template
+            value_template: "{{ day_enabled }}"
           - service: light.turn_on
             enabled: !input day_toggle
             data:
@@ -243,6 +270,8 @@ action:
                 entity_id: !input mode
                 state: Evening
         sequence:
+          - condition: template
+            value_template: "{{ evening_enabled }}"
           - service: light.turn_on
             enabled: !input evening_toggle
             data:
@@ -272,6 +301,8 @@ action:
                 entity_id: !input mode
                 state: Night
         sequence:
+          - condition: template
+            value_template: "{{ night_enabled }}"
           - service: light.turn_on
             enabled: !input night_toggle
             data:
@@ -295,10 +326,14 @@ action:
 
       # Away
       - conditions:
-          - condition: state
-            entity_id: !input mode
-            state: Away
+          - condition: and
+            conditions:
+              - condition: state
+                entity_id: !input mode
+                state: Away
         sequence:
+          - condition: template
+            value_template: "{{ away_enabled }}"
           - service: light.turn_off
             data: {}
             target: !input light_target
@@ -317,4 +352,3 @@ action:
                         target: !input switch_target
                 default:
                   - service: switch.turn_off
-                    target: !input switch_target
