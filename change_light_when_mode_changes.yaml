@@ -26,7 +26,7 @@ blueprint:
     mode:
       name: Mode entity
       description: For example a input select helper
-      default: input_select.modes_dev
+      default: input_select.modes
       selector:
         entity:
           domain: input_select
