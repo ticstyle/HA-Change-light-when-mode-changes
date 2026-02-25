@@ -4,12 +4,9 @@ blueprint:
     "Changes lights on mode change, with a random delay of 5 to 30 seconds
     to spread out the work load on the network if for example one would use this template
     multiple times.
-
     When mode is Away they are automatically shut off.
-
     This blueprint is built with a dependency off a list-helper named (input_select.modes)
     and the list items are the following five (Away, Morning, Day, Evening, Night).
-
     This helper is used by an automation to set Away if no family members or guests
     are at home. Blueprint for that can be found here https://gist.github.com/ticstyle/bdc6f07a00d4f3d97e4967018f58c9e6
     The other ones are set for different times of the day if anyone is home."
@@ -35,6 +32,49 @@ blueprint:
       default: input_boolean.sleep_in
       selector:
         entity:
+
+    # -----------------------
+    # Optional switch control
+    # -----------------------
+    control_switches:
+      name: Control switches
+      description: Enable switch control in this automation
+      default: false
+      selector:
+        boolean: {}
+    switch_target:
+      name: Switch(es)
+      selector:
+        target:
+          entity:
+            - domain:
+                - switch
+    morning_switch_on:
+      name: Morning – switches ON?
+      default: true
+      selector:
+        boolean: {}
+    day_switch_on:
+      name: Day – switches ON?
+      default: true
+      selector:
+        boolean: {}
+    evening_switch_on:
+      name: Evening – switches ON?
+      default: true
+      selector:
+        boolean: {}
+    night_switch_on:
+      name: Night – switches ON?
+      default: false
+      selector:
+        boolean: {}
+    away_switch_on:
+      name: Away – switches ON?
+      default: false
+      selector:
+        boolean: {}
+
     morning_toggle:
       name: Use morning
       selector:
@@ -100,26 +140,41 @@ blueprint:
       selector:
         boolean: {}
       default: true
+
 trigger:
   - platform: state
-    entity_id:
-      - input_select.modes
+    entity_id: !input mode
     for:
       hours: 0
       minutes: 0
       seconds: 5
+
 mode: restart
 max_exceeded: silent
+
 condition: []
+
 action:
+  # The delay
   - delay:
-      seconds: "{{ range(1, 2)|random|int }}"
+      seconds: "{{ range(5, 31)|random|int }}"
+
+  - variables:
+      do_switches: !input control_switches
+      sw_morning: !input morning_switch_on
+      sw_day: !input day_switch_on
+      sw_evening: !input evening_switch_on
+      sw_night: !input night_switch_on
+      sw_away: !input away_switch_on
+
   - choose:
+
+      # Morning
       - conditions:
           - condition: and
             conditions:
               - condition: state
-                entity_id: input_select.modes
+                entity_id: !input mode
                 state: Morning
               - condition: state
                 entity_id: input_boolean.sleep_in
@@ -130,11 +185,28 @@ action:
           data:
             brightness_pct: !input morning_brightness
           target: !input light_target
+          # Switches (optional)
+          - if:
+              - condition: template
+                value_template: "{{ do_switches }}"
+            then:
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ sw_morning }}"
+                    sequence:
+                      - service: switch.turn_on
+                        target: !input switch_target
+                default:
+                  - service: switch.turn_off
+                    target: !input switch_target
+
+      # Day
       - conditions:
           - condition: and
             conditions:
               - condition: state
-                entity_id: input_select.modes
+                entity_id: !input mode
                 state: Day
         sequence:
           service: light.turn_on
@@ -142,11 +214,28 @@ action:
           data:
             brightness_pct: !input day_brightness
           target: !input light_target
+          # Switches (optional)
+          - if:
+              - condition: template
+                value_template: "{{ do_switches }}"
+            then:
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ sw_day }}"
+                    sequence:
+                      - service: switch.turn_on
+                        target: !input switch_target
+                default:
+                  - service: switch.turn_off
+                    target: !input switch_target
+
+      # Evening
       - conditions:
           - condition: and
             conditions:
               - condition: state
-                entity_id: input_select.modes
+                entity_id: !input mode
                 state: Evening
         sequence:
           service: light.turn_on
@@ -154,11 +243,28 @@ action:
           data:
             brightness_pct: !input evening_brightness
           target: !input light_target
+          # Switches (optional)
+          - if:
+              - condition: template
+                value_template: "{{ do_switches }}"
+            then:
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ sw_evening }}"
+                    sequence:
+                      - service: switch.turn_on
+                        target: !input switch_target
+                default:
+                  - service: switch.turn_off
+                    target: !input switch_target
+
+      # Night
       - conditions:
           - condition: and
             conditions:
               - condition: state
-                entity_id: input_select.modes
+                entity_id: !input mode
                 state: Night
         sequence:
           service: light.turn_on
@@ -166,12 +272,44 @@ action:
           data:
             brightness_pct: !input night_brightness
           target: !input light_target
+          # Switches (optional)
+          - if:
+              - condition: template
+                value_template: "{{ do_switches }}"
+            then:
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ sw_night }}"
+                    sequence:
+                      - service: switch.turn_on
+                        target: !input switch_target
+                default:
+                  - service: switch.turn_off
+                    target: !input switch_target
+
+      # Away
       - conditions:
           condition: state
-          entity_id: input_select.modes
+          entity_id: !input mode
           state: Away
         sequence:
           service: light.turn_off
           data: {}
           target: !input light_target
           enabled: !input away_toggle
+          # Switches (optional)
+          - if:
+              - condition: template
+                value_template: "{{ do_switches }}"
+            then:
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ sw_away }}"
+                    sequence:
+                      - service: switch.turn_on
+                        target: !input switch_target
+                default:
+                  - service: switch.turn_off
+                    target: !input switch_target
