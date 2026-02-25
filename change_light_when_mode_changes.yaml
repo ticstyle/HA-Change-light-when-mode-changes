@@ -26,12 +26,14 @@ blueprint:
       default: input_select.modes
       selector:
         entity:
+          domain: input_select
     sleep_in_sensor:
       name: Sleep in Sensor
       description: For example a boolean helper
       default: input_boolean.sleep_in
       selector:
         entity:
+          domain: input_boolean
 
     # -----------------------
     # Optional switch control
@@ -75,6 +77,9 @@ blueprint:
       selector:
         boolean: {}
 
+    # -----------------------
+    # Lights (original)
+    # -----------------------
     morning_toggle:
       name: Use morning
       selector:
@@ -155,7 +160,7 @@ max_exceeded: silent
 condition: []
 
 action:
-  # The delay
+  # Match the 5–30s delay described in the blueprint comments
   - delay:
       seconds: "{{ range(5, 31)|random|int }}"
 
@@ -177,14 +182,14 @@ action:
                 entity_id: !input mode
                 state: Morning
               - condition: state
-                entity_id: input_boolean.sleep_in
+                entity_id: !input sleep_in_sensor
                 state: "off"
         sequence:
-          service: light.turn_on
-          enabled: !input morning_toggle
-          data:
-            brightness_pct: !input morning_brightness
-          target: !input light_target
+          - service: light.turn_on
+            enabled: !input morning_toggle
+            data:
+              brightness_pct: !input morning_brightness
+            target: !input light_target
           # Switches (optional)
           - if:
               - condition: template
@@ -209,11 +214,11 @@ action:
                 entity_id: !input mode
                 state: Day
         sequence:
-          service: light.turn_on
-          enabled: !input day_toggle
-          data:
-            brightness_pct: !input day_brightness
-          target: !input light_target
+          - service: light.turn_on
+            enabled: !input day_toggle
+            data:
+              brightness_pct: !input day_brightness
+            target: !input light_target
           # Switches (optional)
           - if:
               - condition: template
@@ -238,11 +243,11 @@ action:
                 entity_id: !input mode
                 state: Evening
         sequence:
-          service: light.turn_on
-          enabled: !input evening_toggle
-          data:
-            brightness_pct: !input evening_brightness
-          target: !input light_target
+          - service: light.turn_on
+            enabled: !input evening_toggle
+            data:
+              brightness_pct: !input evening_brightness
+            target: !input light_target
           # Switches (optional)
           - if:
               - condition: template
@@ -267,11 +272,11 @@ action:
                 entity_id: !input mode
                 state: Night
         sequence:
-          service: light.turn_on
-          enabled: !input night_toggle
-          data:
-            brightness_pct: !input night_brightness
-          target: !input light_target
+          - service: light.turn_on
+            enabled: !input night_toggle
+            data:
+              brightness_pct: !input night_brightness
+            target: !input light_target
           # Switches (optional)
           - if:
               - condition: template
@@ -290,14 +295,14 @@ action:
 
       # Away
       - conditions:
-          condition: state
-          entity_id: !input mode
-          state: Away
+          - condition: state
+            entity_id: !input mode
+            state: Away
         sequence:
-          service: light.turn_off
-          data: {}
-          target: !input light_target
-          enabled: !input away_toggle
+          - service: light.turn_off
+            data: {}
+            target: !input light_target
+            enabled: !input away_toggle
           # Switches (optional)
           - if:
               - condition: template
