@@ -8,10 +8,10 @@ blueprint:
     This blueprint is built with a dependency off a list-helper named (input_select.modes)
     and the list items are the following five (Away, Morning, Day, Evening, Night).
     This helper is used by an automation to set Away if no family members or guests
-    are at home. Blueprint for that can be found here https://gist.github.com/ticstyle/bdc6f07a00d4f3d97e4967018f58c9e6
+    are at home. Blueprint for that can be found here https://github.com/ticstyle/HA-Day-modes/blob/main/day_modes.yaml
     The other ones are set for different times of the day if anyone is home."
   domain: automation
-  source_url: https://gist.github.com/ticstyle/f5f7409f5b9259f60bdeb5a3346666e9
+  source_url: https://github.com/ticstyle/HA-Change-light-when-mode-changes/blob/main/change_light_when_mode_changes.yaml
 
   input:
     light_target:
