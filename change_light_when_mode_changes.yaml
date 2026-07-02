@@ -1,15 +1,18 @@
 blueprint:
   name: Change light when mode changes
   description:
-    "Changes lights on mode change, with a random delay of 5 to 30 seconds
+    "### Version 1.1.0
+    Changes lights on mode change, with a random delay of 5 to 30 seconds
     to spread out the work load on the network if for example one would use this template
     multiple times.
+
     When mode is Away they are automatically shut off.
-    This blueprint is built with a dependency off a list-helper named (input_select.modes)
-    and the list items are the following five (Away, Morning, Day, Evening, Night).
-    This helper is used by an automation to set Away if no family members or guests
-    are at home. Blueprint for that can be found here https://github.com/ticstyle/HA-Day-modes/blob/main/day_modes.yaml
-    The other ones are set for different times of the day if anyone is home."
+
+    **Dependencies:**
+    * Built with a dependency on a sensor named `sensor.day_modes` which can have one of the following five values: `away`, `morning`, `day`, `evening`, `night`.
+    * A HACS integration for managing these modes can be found here: https://github.com/ticstyle/Day-Modes
+
+    The other modes are set for different times of the day if anyone is home."
   domain: automation
   source_url: https://github.com/ticstyle/HA-Change-light-when-mode-changes/blob/main/change_light_when_mode_changes.yaml
 
@@ -25,11 +28,13 @@ blueprint:
 
     mode:
       name: Mode entity
-      description: For example a input select helper
+      description: Choose an input_select helper or a sensor tracking the mode.
       default: input_select.modes
       selector:
         entity:
-          domain: input_select
+          domain:
+            - input_select
+            - sensor
 
     sleep_in_sensor:
       name: Sleep in Sensor
@@ -205,7 +210,7 @@ action:
             conditions:
               - condition: state
                 entity_id: !input mode
-                state: Morning
+                state: ["Morning", "morning"]
               - condition: state
                 entity_id: !input sleep_in_sensor
                 state: "off"
@@ -239,7 +244,7 @@ action:
             conditions:
               - condition: state
                 entity_id: !input mode
-                state: Day
+                state: ["Day", "day"]
         sequence:
           - condition: template
             value_template: "{{ day_enabled }}"
@@ -270,7 +275,7 @@ action:
             conditions:
               - condition: state
                 entity_id: !input mode
-                state: Evening
+                state: ["Evening", "evening"]
         sequence:
           - condition: template
             value_template: "{{ evening_enabled }}"
@@ -301,7 +306,7 @@ action:
             conditions:
               - condition: state
                 entity_id: !input mode
-                state: Night
+                state: ["Night", "night"]
         sequence:
           - condition: template
             value_template: "{{ night_enabled }}"
@@ -332,7 +337,7 @@ action:
             conditions:
               - condition: state
                 entity_id: !input mode
-                state: Away
+                state: ["Away", "away"]
         sequence:
           - condition: template
             value_template: "{{ away_enabled }}"
@@ -354,3 +359,4 @@ action:
                         target: !input switch_target
                 default:
                   - service: switch.turn_off
+                    target: !input switch_target
