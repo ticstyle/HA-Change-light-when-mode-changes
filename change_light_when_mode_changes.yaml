@@ -2,7 +2,7 @@ blueprint:
   name: Change light when mode changes
   description:
     " ***Version*** 
-    1.1.1
+    1.2.0
 
     ***What it does***
     Changes lights upon mode change, with a random delay of 5 to 31 seconds
@@ -38,14 +38,6 @@ blueprint:
           domain:
             - input_select
             - sensor
-
-    sleep_in_sensor:
-      name: Sleep in Sensor
-      description: For example a boolean helper (this disables the morning mode).
-      default: input_boolean.sleep_in
-      selector:
-        entity:
-          domain: input_boolean
 
     # -----------------------
     # Optional switch control
@@ -214,9 +206,6 @@ action:
               - condition: state
                 entity_id: !input mode
                 state: ["Morning", "morning"]
-              - condition: state
-                entity_id: !input sleep_in_sensor
-                state: "off"
         sequence:
           - condition: template
             value_template: "{{ morning_enabled }}"
