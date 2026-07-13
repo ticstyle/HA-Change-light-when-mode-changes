@@ -1,0 +1,44 @@
+name: Validate Blueprint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  yamllint:
+    name: 🚀 YAML Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: 📦 Install yamllint
+        run: pip install yamllint
+
+      - name: 🎛️ Run yamllint
+        run: yamllint -f github -c .yamllint.yml .
+
+  ha-config-check:
+    name: 🏠 Home Assistant Config Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Setup Mock HA Environment
+        run: |
+          mkdir -p config/blueprints/automation/my_blueprint
+          cp *.yaml config/blueprints/automation/my_blueprint/
+          echo "default_config:" > config/configuration.yaml
+
+      - name: 🧪 Test in Home Assistant Core
+        uses: frenck/action-home-assistant@v1
+        with:
+          path: "config"
