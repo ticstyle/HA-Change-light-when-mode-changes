@@ -2,9 +2,9 @@ name: Validate Blueprint
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   yamllint:
@@ -23,7 +23,7 @@ jobs:
         run: pip install yamllint
 
       - name: 🎛️ Run yamllint
-        run: yamllint -c .yamllint.yml .
+        run: yamllint -f github -c .yamllint.yml .
 
   ha-config-check:
     name: 🏠 Home Assistant Config Check
