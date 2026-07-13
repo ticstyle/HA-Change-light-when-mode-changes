@@ -4,16 +4,8 @@ extends: default
 rules:
   # Allow long lines inside blueprint descriptions and markdown
   line-length: disable
-  # Ignore Home Assistant custom tags like !input, !secret, !include
-  custom-tags:
-    - '!input'
-    - '!secret'
-    - '!include'
-    - '!include_dir_list'
-    - '!include_dir_named'
-    - '!include_dir_merge_list'
-    - '!include_dir_merge_named'
-  # Allow flexible truthy values
+
+  # Allow truthy values commonly used in Home Assistant
   truthy:
     allowed-values:
       - 'true'
@@ -22,6 +14,11 @@ rules:
       - 'off'
       - 'yes'
       - 'no'
+
+  # Allow standard Home Assistant block sequence indentation
+  indentation:
+    spaces: 2
+    indent-sequences: whatever
 
 ignore: |
   .git/
