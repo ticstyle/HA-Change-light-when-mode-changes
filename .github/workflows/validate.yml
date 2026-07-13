@@ -1,0 +1,47 @@
+name: Validate Blueprint
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  yamllint:
+    name: 🧹 Lint YAML Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Run YAML Lint
+        uses: ibaraki/action-yamllint@v1
+        with:
+          file_or_dir: .
+          config_data: |
+            extends: relaxed
+            rules:
+              line-length: disable
+              # Allow custom Home Assistant YAML tags so linting doesn't fail on !input
+              custom-tags:
+                - "!input"
+                - "!secret"
+                - "!include"
+
+  ha-validation:
+    name: 🏠 Home Assistant Core Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📁 Set up mock Home Assistant folder
+        run: |
+          mkdir -p config/blueprints/automation/ticstyle
+          cp *.yaml config/blueprints/automation/ticstyle/
+          echo "default_config:" > config/configuration.yaml
+
+      - name: 🚀 Run Home Assistant Core Config Check
+        uses: frenck/action-home-assistant@v1
+        with:
+          path: "./config"
