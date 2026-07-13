@@ -1,18 +1,21 @@
 blueprint:
   name: Change light when mode changes
   description:
-    "### Version 1.1.0
-    Changes lights on mode change, with a random delay of 5 to 30 seconds
+    " ***Version*** 
+    1.1.1
+
+    ***What it does***
+    Changes lights upon mode change, with a random delay of 5 to 31 seconds
     to spread out the work load on the network if for example one would use this template
     multiple times.
 
-    When mode is Away they are automatically shut off.
+    When the mode is Away the enteties are automatically shut off.
+    The other modes are set for different times of the day if anyone is home.
 
     **Dependencies:**
-    * Built with a dependency on a sensor named `sensor.day_modes` which can have one of the following five values: `away`, `morning`, `day`, `evening`, `night`.
-    * A HACS integration for managing these modes can be found here: https://github.com/ticstyle/Day-Modes
-
-    The other modes are set for different times of the day if anyone is home."
+    * Built with a dependency on a sensor named `sensor.day_modes` which can have one of the following five values: `Away`, `Morning`, `Day`, `Eevening`, `Night`.
+    * A HACS integration for managing these modes can be found here: https://github.com/ticstyle/Day-Modes"
+    
   domain: automation
   source_url: https://github.com/ticstyle/HA-Change-light-when-mode-changes/blob/main/change_light_when_mode_changes.yaml
 
@@ -28,8 +31,8 @@ blueprint:
 
     mode:
       name: Mode entity
-      description: Choose an input_select helper or a sensor tracking the mode.
-      default: input_select.modes
+      description: Choose a sensor that is tracking the modes, alternatively an input_select helper that does the same.
+      default: sensor.day_modes
       selector:
         entity:
           domain:
@@ -38,7 +41,7 @@ blueprint:
 
     sleep_in_sensor:
       name: Sleep in Sensor
-      description: For example a boolean helper
+      description: For example a boolean helper (this disables the morning mode).
       default: input_boolean.sleep_in
       selector:
         entity:
@@ -49,7 +52,7 @@ blueprint:
     # -----------------------
     control_switches:
       name: Control switches
-      description: Enable switch control in this automation
+      description: Enable switch control in this automation (if you for example whant to control an outlet or a switch instead of a light).
       default: false
       selector:
         boolean: {}
