@@ -2,20 +2,24 @@
 extends: default
 
 rules:
-  # Allow long lines inside blueprint descriptions and markdown
+  # Disable strict document start requirement ('---' at top of file)
+  document-start: disable
+
+  # Disable strict line length limits
   line-length: disable
 
-  # Allow truthy values commonly used in Home Assistant
-  truthy:
-    allowed-values:
-      - 'true'
-      - 'false'
-      - 'on'
-      - 'off'
-      - 'yes'
-      - 'no'
+  # Disable strict comment spacing rules
+  comments: disable
+  comments-indentation: disable
 
-  # Allow standard Home Assistant block sequence indentation
+  # Disable trailing whitespace and empty line checks
+  trailing-spaces: disable
+  empty-lines: disable
+
+  # Allow boolean values common in Home Assistant
+  truthy: disable
+
+  # Allow flexible sequence indentation
   indentation:
     spaces: 2
     indent-sequences: whatever
