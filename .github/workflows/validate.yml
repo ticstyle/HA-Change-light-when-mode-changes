@@ -2,46 +2,43 @@ name: Validate Blueprint
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
 
 jobs:
   yamllint:
-    name: 🧹 Lint YAML Syntax
+    name: 🚀 YAML Linting
     runs-on: ubuntu-latest
     steps:
-      - name: ⤵️ Checkout Code
+      - name: 📥 Checkout Code
         uses: actions/checkout@v4
 
-      - name: 🚀 Run YAML Lint
-        uses: ibaraki/action-yamllint@v1
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
         with:
-          file_or_dir: .
-          config_data: |
-            extends: relaxed
-            rules:
-              line-length: disable
-              # Allow custom Home Assistant YAML tags so linting doesn't fail on !input
-              custom-tags:
-                - "!input"
-                - "!secret"
-                - "!include"
+          python-version: '3.x'
 
-  ha-validation:
-    name: 🏠 Home Assistant Core Check
+      - name: 📦 Install yamllint
+        run: pip install yamllint
+
+      - name: 🎛️ Run yamllint
+        run: yamllint -c .yamllint.yml .
+
+  ha-config-check:
+    name: 🏠 Home Assistant Config Check
     runs-on: ubuntu-latest
     steps:
-      - name: ⤵️ Checkout Code
+      - name: 📥 Checkout Code
         uses: actions/checkout@v4
 
-      - name: 📁 Set up mock Home Assistant folder
+      - name: 🛠️ Setup Mock HA Environment
         run: |
-          mkdir -p config/blueprints/automation/ticstyle
-          cp *.yaml config/blueprints/automation/ticstyle/
+          mkdir -p config/blueprints/automation/my_blueprint
+          cp *.yaml config/blueprints/automation/my_blueprint/
           echo "default_config:" > config/configuration.yaml
 
-      - name: 🚀 Run Home Assistant Core Config Check
+      - name: 🧪 Test in Home Assistant Core
         uses: frenck/action-home-assistant@v1
         with:
-          path: "./config"
+          path: "config"
