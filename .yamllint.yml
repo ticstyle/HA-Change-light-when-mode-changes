@@ -2,22 +2,15 @@
 extends: default
 
 rules:
-  # Disable strict document start requirement ('---' at top of file)
+  # Disable cosmetic rules
   document-start: disable
-
-  # Disable strict line length limits
   line-length: disable
-
-  # Disable strict comment spacing rules
   comments: disable
   comments-indentation: disable
-
-  # Disable trailing whitespace and empty line checks
   trailing-spaces: disable
   empty-lines: disable
-
-  # Allow boolean values common in Home Assistant
   truthy: disable
+  brackets: disable
 
   # Allow flexible sequence indentation
   indentation:
