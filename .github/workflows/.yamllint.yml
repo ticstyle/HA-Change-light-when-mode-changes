@@ -1,0 +1,27 @@
+---
+extends: default
+
+rules:
+  # Allow long lines inside blueprint descriptions and markdown
+  line-length: disable
+  # Ignore Home Assistant custom tags like !input, !secret, !include
+  custom-tags:
+    - '!input'
+    - '!secret'
+    - '!include'
+    - '!include_dir_list'
+    - '!include_dir_named'
+    - '!include_dir_merge_list'
+    - '!include_dir_merge_named'
+  # Allow flexible truthy values
+  truthy:
+    allowed-values:
+      - 'true'
+      - 'false'
+      - 'on'
+      - 'off'
+      - 'yes'
+      - 'no'
+
+ignore: |
+  .git/
